@@ -24,6 +24,7 @@ from local.resample_folder import resample_folder
 from local.utils import generate_tsv_wav_durations
 
 
+
 def resample_data_generate_durations(config_data, test_only=False, evaluation=False):
     if not test_only:
         dsets = [
