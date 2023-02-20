@@ -114,17 +114,13 @@ class SEDTask4(pl.LightningModule):
 
         # for weak labels we simply compute f1 score
         self.get_weak_student_f1_seg_macro = torchmetrics.classification.f_beta.F1Score(
-            # len(self.encoder.labels),
-            task="multilabel",
-            num_labels=len(self.encoder.labels),
+            len(self.encoder.labels),
             average="macro",
             compute_on_step=False,
         )
 
         self.get_weak_teacher_f1_seg_macro = torchmetrics.classification.f_beta.F1Score(
-            # len(self.encoder.labels),
-            task="multilabel",
-            num_labels=len(self.encoder.labels),
+            len(self.encoder.labels),
             average="macro",
             compute_on_step=False,
         )
@@ -260,7 +256,7 @@ class SEDTask4(pl.LightningModule):
         """
 
         audio, labels, padded_indxs = batch
-        indx_synth, indx_weak, indx_unlabelled = self.hparams["training"]["batch_size"]
+        indx_synth, indx_weak = self.hparams["training"]["batch_size"]
         features = self.mel_spec(audio)
 
         batch_num = features.shape[0]
@@ -268,7 +264,7 @@ class SEDTask4(pl.LightningModule):
         strong_mask = torch.zeros(batch_num).to(features).bool()
         weak_mask = torch.zeros(batch_num).to(features).bool()
         strong_mask[:indx_synth] = 1
-        weak_mask[indx_synth : indx_weak + indx_synth] = 1
+        weak_mask[indx_synth : indx_synth + indx_weak] = 1
 
         # deriving weak labels
         labels_weak = (torch.sum(labels[weak_mask], -1) > 0).float()

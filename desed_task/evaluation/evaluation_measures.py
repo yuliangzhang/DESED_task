@@ -243,9 +243,9 @@ def compute_psds_from_operating_points(
                 index=False,
             )
 
-        plot_psd_roc(
-            psds_score,
-            filename=os.path.join(save_dir, f"PSDS_ct{alpha_ct}_st{alpha_st}_100.png"),
-        )
+        # plot_psd_roc(
+        #     psds_score,
+        #     filename=os.path.join(save_dir, f"PSDS_ct{alpha_ct}_st{alpha_st}_100.png"),
+        # )
 
     return psds_score.value

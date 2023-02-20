@@ -23,7 +23,7 @@ from local.sed_trainer import SEDTask4
 from local.resample_folder import resample_folder
 from local.utils import generate_tsv_wav_durations
 
-warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.filterwarnings('ignore')
 def resample_data_generate_durations(config_data, test_only=False, evaluation=False):
     if not test_only:
         dsets = [
@@ -299,7 +299,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--log_dir",
-        default="./exp/2022_baseline",
+        default="./exp/2022_baseline_investigate/strong_weak_unlabeled",
         help="Directory where to save tensorboard logs, saved models, etc.",
     )
 

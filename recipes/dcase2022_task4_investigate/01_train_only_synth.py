@@ -19,11 +19,11 @@ from desed_task.utils.encoder import ManyHotEncoder
 from desed_task.utils.schedulers import ExponentialWarmup
 
 from local.classes_dict import classes_labels
-from local.sed_trainer import SEDTask4
+from local.sed_trainer_strong_only import SEDTask4
 from local.resample_folder import resample_folder
 from local.utils import generate_tsv_wav_durations
 
-warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.filterwarnings('ignore')
 def resample_data_generate_durations(config_data, test_only=False, evaluation=False):
     if not test_only:
         dsets = [
@@ -118,35 +118,35 @@ def single_run(
             pad_to=config["data"]["audio_max_len"],
         )
 
-        if strong_real:
-            strong_df = pd.read_csv(config["data"]["strong_tsv"], sep="\t")
-            strong_set = StronglyAnnotatedSet(
-                config["data"]["strong_folder"],
-                strong_df,
-                encoder,
-                pad_to=config["data"]["audio_max_len"],
-            )
+        # if strong_real:
+        #     strong_df = pd.read_csv(config["data"]["strong_tsv"], sep="\t")
+        #     strong_set = StronglyAnnotatedSet(
+        #         config["data"]["strong_folder"],
+        #         strong_df,
+        #         encoder,
+        #         pad_to=config["data"]["audio_max_len"],
+        #     )
         
 
-        weak_df = pd.read_csv(config["data"]["weak_tsv"], sep="\t")
-        train_weak_df = weak_df.sample(
-            frac=config["training"]["weak_split"],
-            random_state=config["training"]["seed"],
-        )
-        valid_weak_df = weak_df.drop(train_weak_df.index).reset_index(drop=True)
-        train_weak_df = train_weak_df.reset_index(drop=True)
-        weak_set = WeakSet(
-            config["data"]["weak_folder"],
-            train_weak_df,
-            encoder,
-            pad_to=config["data"]["audio_max_len"],
-        )
-
-        unlabeled_set = UnlabeledSet(
-            config["data"]["unlabeled_folder"],
-            encoder,
-            pad_to=config["data"]["audio_max_len"],
-        )
+        # weak_df = pd.read_csv(config["data"]["weak_tsv"], sep="\t")
+        # train_weak_df = weak_df.sample(
+        #     frac=config["training"]["weak_split"],
+        #     random_state=config["training"]["seed"],
+        # )
+        # valid_weak_df = weak_df.drop(train_weak_df.index).reset_index(drop=True)
+        # train_weak_df = train_weak_df.reset_index(drop=True)
+        # weak_set = WeakSet(
+        #     config["data"]["weak_folder"],
+        #     train_weak_df,
+        #     encoder,
+        #     pad_to=config["data"]["audio_max_len"],
+        # )
+        #
+        # unlabeled_set = UnlabeledSet(
+        #     config["data"]["unlabeled_folder"],
+        #     encoder,
+        #     pad_to=config["data"]["audio_max_len"],
+        # )
 
         synth_df_val = pd.read_csv(config["data"]["synth_val_tsv"], sep="\t")
         synth_val = StronglyAnnotatedSet(
@@ -157,26 +157,27 @@ def single_run(
             pad_to=config["data"]["audio_max_len"],
         )
 
-        weak_val = WeakSet(
-            config["data"]["weak_folder"],
-            valid_weak_df,
-            encoder,
-            pad_to=config["data"]["audio_max_len"],
-            return_filename=True,
-        )
+        # weak_val = WeakSet(
+        #     config["data"]["weak_folder"],
+        #     valid_weak_df,
+        #     encoder,
+        #     pad_to=config["data"]["audio_max_len"],
+        #     return_filename=True,
+        # )
 
-        if strong_real:
-            strong_full_set = torch.utils.data.ConcatDataset([strong_set, synth_set])
-            tot_train_data = [strong_full_set, weak_set, unlabeled_set]
-        else:
-            tot_train_data = [synth_set, weak_set, unlabeled_set]
+        # if strong_real:
+        #     strong_full_set = torch.utils.data.ConcatDataset([strong_set, synth_set])
+        #     tot_train_data = [strong_full_set, weak_set, unlabeled_set]
+        # else:
+        #     tot_train_data = [synth_set, weak_set, unlabeled_set]
+        tot_train_data = [synth_set]
         train_dataset = torch.utils.data.ConcatDataset(tot_train_data)
 
         batch_sizes = config["training"]["batch_size"]
         samplers = [torch.utils.data.RandomSampler(x) for x in tot_train_data]
         batch_sampler = ConcatDatasetBatchSampler(samplers, batch_sizes)
 
-        valid_dataset = torch.utils.data.ConcatDataset([synth_val, weak_val])
+        valid_dataset = torch.utils.data.ConcatDataset([synth_val])
 
         ##### training params and optimizers ############
         epoch_len = min(
@@ -294,12 +295,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("Training a SED system for DESED Task")
     parser.add_argument(
         "--conf_file",
-        default="./confs/default.yaml",
+        default="./confs/01_only_synth.yaml",
         help="The configuration file with all the experiment parameters.",
     )
     parser.add_argument(
         "--log_dir",
-        default="./exp/2022_baseline",
+        default="./exp/2022_baseline_investigate/synth_only",
         help="Directory where to save tensorboard logs, saved models, etc.",
     )
 

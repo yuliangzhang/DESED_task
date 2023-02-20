@@ -19,11 +19,11 @@ from desed_task.utils.encoder import ManyHotEncoder
 from desed_task.utils.schedulers import ExponentialWarmup
 
 from local.classes_dict import classes_labels
-from local.sed_trainer import SEDTask4
+from local.sed_trainer_strong_weak import SEDTask4
 from local.resample_folder import resample_folder
 from local.utils import generate_tsv_wav_durations
 
-warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.filterwarnings('ignore')
 def resample_data_generate_durations(config_data, test_only=False, evaluation=False):
     if not test_only:
         dsets = [
@@ -142,11 +142,11 @@ def single_run(
             pad_to=config["data"]["audio_max_len"],
         )
 
-        unlabeled_set = UnlabeledSet(
-            config["data"]["unlabeled_folder"],
-            encoder,
-            pad_to=config["data"]["audio_max_len"],
-        )
+        # unlabeled_set = UnlabeledSet(
+        #     config["data"]["unlabeled_folder"],
+        #     encoder,
+        #     pad_to=config["data"]["audio_max_len"],
+        # )
 
         synth_df_val = pd.read_csv(config["data"]["synth_val_tsv"], sep="\t")
         synth_val = StronglyAnnotatedSet(
@@ -167,9 +167,9 @@ def single_run(
 
         if strong_real:
             strong_full_set = torch.utils.data.ConcatDataset([strong_set, synth_set])
-            tot_train_data = [strong_full_set, weak_set, unlabeled_set]
+            tot_train_data = [strong_full_set, weak_set]
         else:
-            tot_train_data = [synth_set, weak_set, unlabeled_set]
+            tot_train_data = [synth_set, weak_set]
         train_dataset = torch.utils.data.ConcatDataset(tot_train_data)
 
         batch_sizes = config["training"]["batch_size"]
@@ -294,12 +294,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("Training a SED system for DESED Task")
     parser.add_argument(
         "--conf_file",
-        default="./confs/default.yaml",
+        default="./confs/02_strong_weak.yaml",
         help="The configuration file with all the experiment parameters.",
     )
     parser.add_argument(
         "--log_dir",
-        default="./exp/2022_baseline",
+        default="./exp/2022_baseline_investigate/synth_only",
         help="Directory where to save tensorboard logs, saved models, etc.",
     )
 
