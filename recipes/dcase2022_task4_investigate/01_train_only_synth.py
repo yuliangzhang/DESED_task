@@ -24,6 +24,7 @@ from local.resample_folder import resample_folder
 from local.utils import generate_tsv_wav_durations
 
 warnings.filterwarnings('ignore')
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 def resample_data_generate_durations(config_data, test_only=False, evaluation=False):
     if not test_only:
         dsets = [
@@ -316,7 +317,10 @@ if __name__ == "__main__":
         help="Allow the training to be resumed, take as input a previously saved model (.ckpt).",
     )
     parser.add_argument(
-        "--test_from_checkpoint", default=None, help="Test the model specified"
+        "--test_from_checkpoint",
+        # default=None,
+        default="/media/storage/home/22828187/work_dir/DESED_task/recipes/dcase2022_task4_investigate/exp/2022_baseline_investigate/synth_only/version_2/last.ckpt",
+        help="Test the model specified"
     )
     parser.add_argument(
         "--gpus",
